@@ -1243,10 +1243,8 @@ static void fec_txq(struct net_device *ndev, struct fec_enet_priv_tx_q *txq)
 					 fec16_to_cpu(bdp->cbd_datlen),
 					 DMA_TO_DEVICE);
 		bdp->cbd_bufaddr = cpu_to_fec32(0);
-		if (!skb) {
-			bdp = fec_enet_get_nextdesc(bdp, &txq->bd);
-			continue;
-		}
+		if (!skb)
+			goto skb_done;
 
 		/* Check for errors. */
 		if (status & (BD_ENET_TX_HB | BD_ENET_TX_LC |
@@ -1285,7 +1283,7 @@ static void fec_txq(struct net_device *ndev, struct fec_enet_priv_tx_q *txq)
 
 		/* Free the sk buffer associated with this last transmit */
 		dev_kfree_skb_any(skb);
-
+skb_done:
 		/* Make sure the update to bdp and tx_skbuff are performed
 		 * before dirty_tx
 		 */
